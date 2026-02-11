@@ -8,30 +8,39 @@ from selenium.webdriver.support.ui import Select
 from selenium.webdriver.chrome.options import Options
 from webdriver_manager.chrome import ChromeDriverManager
 from selenium.webdriver.chrome.service import Service
+from selenium.webdriver.firefox.options import Options as FirefoxOptions
+from webdriver_manager.firefox import GeckoDriverManager
+
 import os
 
 class TestCalculator:
     @pytest.fixture(scope="class")
     def driver(self):
-        """Configuration du driver Chrome pour les tests"""
-        chrome_options = Options()
-        
-        # Configuration pour environnement CI/CD
-        if os.getenv('CI'):
-            chrome_options.add_argument('--headless')
-            chrome_options.add_argument('--no-sandbox')
-            chrome_options.add_argument('--disable-dev-shm-usage')
-            chrome_options.add_argument('--disable-gpu')
-            chrome_options.add_argument('--window-size=1920,1080')
-            # En CI, on utilise le chromedriver du système
-            driver = webdriver.Chrome(options=chrome_options)
-        else:
-            # En local, on utilise webdriver-manager
+        """Configuration du driver dynamique (Chrome ou Firefox)"""
+        browser = os.getenv('BROWSER', 'chrome').lower()
+        driver = None
+
+        if browser == 'firefox':
+            options = FirefoxOptions()
+            if os.getenv('CI'):
+                options.add_argument('--headless')
+
+            service = Service(GeckoDriverManager().install())
+            driver = webdriver.Firefox(service=service, options=options)
+
+        else: # Par défaut Chrome
+            options = Options()
+            if os.getenv('CI'):
+                options.add_argument('--headless')
+                options.add_argument('--no-sandbox')
+                options.add_argument('--disable-dev-shm-usage')
+                options.add_argument('--disable-gpu')
+                options.add_argument('--window-size=1920,1080')
+
             service = Service(ChromeDriverManager().install())
-            driver = webdriver.Chrome(service=service, options=chrome_options)
-        
+            driver = webdriver.Chrome(service=service, options=options)
+
         driver.implicitly_wait(10)
-        
         yield driver
         driver.quit()
     

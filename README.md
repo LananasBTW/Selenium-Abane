@@ -1,3 +1,4 @@
+![CI/CD Pipeline](https://github.com/LananasBTW/Selenium-Abane/actions/workflows/ci-cd.yml/badge.svg)
 # 1. Avantages observés
 ## Quels sont les avantages de l'automatisation des tests que vous avez constatés ?
 

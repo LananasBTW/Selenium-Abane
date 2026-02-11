@@ -47,7 +47,19 @@ jobs:
          with: 
            name: test-results 
            path: test-report.html 
-    
+       - name: Generate Coverage Badge
+         if: matrix.browser == 'chrome' # On ne le fait qu'une fois
+         run: |
+          cd tests
+          pip install coverage-badge
+          coverage-badge -o ../coverage.svg -f
+
+       - name: Upload Coverage Badge
+         if: matrix.browser == 'chrome'
+         uses: actions/upload-artifact@v4
+         with:
+          name: coverage-badge
+          path: coverage.svg    
      deploy: 
        needs: test 
        runs-on: ubuntu-latest 
